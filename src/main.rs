@@ -5,23 +5,48 @@ use std::process;
 mod calc;
 
 use calc::eval::eval;
-use calc::lexer::{Lexer, LexerErr};
+use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
 
+
 fn main() {
-    eval_main();
+    loop {
+        let input = read_user_input();
+        if input.trim().is_empty() {
+            continue;
+        }
+        let lexer = Lexer::new(input);
+        let expr = match Parser::new(lexer).parse() {
+            Result::Ok(t) => t,
+            Result::Err(e) => {
+                eprintln!("ParserError: {:?}", e);
+                continue;
+            }
+        };
+        let value = match eval(&expr) {
+            Result::Ok(v) => v,
+            Result::Err(e) => {
+                eprintln!("EvalError: {:?}", e);
+                continue;
+            },
+        };
+        match value {
+            Value::Int(i) => println!("{}", i),
+            Value::Float(f) => println!("{}", f),
+        };
+    }
 }
 
-fn get_expression() -> String {
+fn read_user_input() -> String {
     let mut input = String::new();
 
     print!("> ");
     match io::stdout().flush() {
         Ok(x) => x,
         Err(e) => {
-            println!("Unable to flush stdout: {}", e);
+            println!("failed to flush stdout: {}", e);
             process::exit(1);
         }
     };
@@ -29,96 +54,10 @@ fn get_expression() -> String {
     match io::stdin().read_line(&mut input) {
         Ok(x) => x,
         Err(e) => {
-            println!("Unable to read from stdin: {}", e);
+            println!("failed to read from stdin: {}", e);
             process::exit(1);
         }
     };
 
     String::from(input.trim_end_matches("\n"))
-}
-
-#[allow(dead_code)]
-fn lexer_main() {
-    loop {
-        let input = get_expression();
-        if input == String::from("exit") {
-            break;
-        }
-
-        let mut lexer = Lexer::new(input.as_str());
-        loop {
-            let result = lexer.next_token();
-            match result {
-                Ok(token) => {
-                    println!("{:?}", token);
-                    match token {
-                        Token::EOF(_) => break,
-                        _ => {}
-                    };
-                }
-                Err(error) => match error {
-                    LexerErr::IllegalChar(ch, pos) => {
-                        eprintln!("Error: Illegal character '{}' at {}", ch, pos);
-                        break;
-                    }
-                },
-            };
-        }
-    }
-}
-
-#[allow(dead_code)]
-fn parser_main() {
-    loop {
-        let input = get_expression();
-        let expr = input.as_str();
-        let tokens = match Lexer::new(expr).tokenise() {
-            Result::Ok(t) => t,
-            Result::Err(e) => {
-                eprintln!("LexerError: {:?}", e);
-                continue;
-            }
-        };
-        dbg!(&tokens);
-        let tree = match Parser::new(tokens).parse() {
-            Result::Ok(t) => t,
-            Result::Err(e) => {
-                eprintln!("ParserError: {:?}", e);
-                continue;
-            }
-        };
-        dbg!(tree);
-    }
-}
-
-#[allow(dead_code)]
-fn eval_main() {
-    loop {
-        let input = get_expression();
-        let expr = input.as_str();
-        if expr == "" {
-            continue;
-        }
-        let tokens = match Lexer::new(expr).tokenise() {
-            Result::Ok(t) => t,
-            Result::Err(e) => {
-                eprintln!("LexerError: {:?}", e);
-                continue;
-            }
-        };
-        // dbg!(&tokens);
-        let tree = match Parser::new(tokens).parse() {
-            Result::Ok(t) => t,
-            Result::Err(e) => {
-                eprintln!("ParserError: {:?}", e);
-                continue;
-            }
-        };
-        // dbg!(&tree);
-        let value = eval(&tree);
-        match value {
-            Value::INT(i) => println!("{}", i),
-            Value::FLOAT(f) => println!("{}", f),
-        };
-    }
 }

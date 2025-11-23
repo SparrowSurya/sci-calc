@@ -3,40 +3,40 @@ use std::fmt;
 
 #[derive(Clone, PartialEq)]
 pub enum UnOp {
-    POS,
-    NEG,
+    Pos,
+    Neg,
 }
 
 #[derive(Clone, PartialEq)]
 pub enum BinOp {
-    PLUS,
-    MINUS,
-    MUL,
-    DIV,
-    MOD,
-    POW,
+    Plus,
+    Minus,
+    Mul,
+    Div,
+    Mod,
+    Pow,
 }
 
 #[derive(Clone, PartialEq)]
 pub enum Expr {
-    UNOP(UnOp, Box<Expr>),
-    BINOP(BinOp, Box<Expr>, Box<Expr>),
-    ATOM(Atom),
+    UnOp(UnOp, Box<Expr>),
+    BinOp(BinOp, Box<Expr>, Box<Expr>),
+    Atom(Atom),
 }
 
 #[derive(Clone, PartialEq)]
 pub enum Atom {
-    INT(Integer),
-    FLOAT(Float),
-    CONST(String),
-    FUNC(String, Vec<Expr>),
+    Int(Integer),
+    Float(Float),
+    Const(String),
+    Func(String, Vec<Expr>),
 }
 
 impl fmt::Debug for UnOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            UnOp::NEG => write!(f, "-"),
-            UnOp::POS => write!(f, "+"),
+            UnOp::Neg => write!(f, "-"),
+            UnOp::Pos => write!(f, "+"),
         }
     }
 }
@@ -44,12 +44,12 @@ impl fmt::Debug for UnOp {
 impl fmt::Debug for BinOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let sym = match self {
-            BinOp::PLUS => "+",
-            BinOp::MINUS => "-",
-            BinOp::MUL => "*",
-            BinOp::DIV => "/",
-            BinOp::MOD => "%",
-            BinOp::POW => "^",
+            BinOp::Plus => "+",
+            BinOp::Minus => "-",
+            BinOp::Mul => "*",
+            BinOp::Div => "/",
+            BinOp::Mod => "%",
+            BinOp::Pow => "^",
         };
         write!(f, "{}", sym)
     }
@@ -58,15 +58,13 @@ impl fmt::Debug for BinOp {
 impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expr::UNOP(op, expr) => {
+            Expr::UnOp(op, expr) => {
                 write!(f, "({:?}{:?})", op, expr)
-            }
-
-            Expr::BINOP(op, left, right) => {
+            },
+            Expr::BinOp(op, left, right) => {
                 write!(f, "({:?} {:?} {:?})", left, op, right)
-            }
-
-            Expr::ATOM(a) => write!(f, "{:?}", a),
+            },
+            Expr::Atom(a) => write!(f, "{:?}", a),
         }
     }
 }
@@ -74,20 +72,17 @@ impl fmt::Debug for Expr {
 impl fmt::Debug for Atom {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Atom::INT(i) => write!(f, "{}", i),
-            Atom::FLOAT(fl) => write!(f, "{}", fl),
-            Atom::CONST(name) => write!(f, "{}", name),
-
-            Atom::FUNC(name, args) => {
+            Atom::Int(i) => write!(f, "{}", i),
+            Atom::Float(fl) => write!(f, "{}", fl),
+            Atom::Const(name) => write!(f, "{}", name),
+            Atom::Func(name, args) => {
                 write!(f, "{}(", name)?;
-
                 for (i, arg) in args.iter().enumerate() {
                     if i > 0 {
                         write!(f, ", ")?;
                     }
                     write!(f, "{:?}", arg)?;
                 }
-
                 write!(f, ")")
             }
         }
