@@ -1,2 +1,2 @@
-pub type Integer = u128;
-pub type Float = f32;
+pub type Integer = i128;
+pub type Float = f64;

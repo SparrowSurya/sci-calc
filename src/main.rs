@@ -4,12 +4,14 @@ use std::process;
 
 mod calc;
 
+use calc::eval::eval;
 use calc::lexer::{Lexer, LexerErr};
 use calc::parser::Parser;
 use calc::token::Token;
+use calc::value::Value;
 
 fn main() {
-    parser_main();
+    eval_main();
 }
 
 fn get_expression() -> String {
@@ -86,5 +88,37 @@ fn parser_main() {
             }
         };
         dbg!(tree);
+    }
+}
+
+#[allow(dead_code)]
+fn eval_main() {
+    loop {
+        let input = get_expression();
+        let expr = input.as_str();
+        if expr == "" {
+            continue;
+        }
+        let tokens = match Lexer::new(expr).tokenise() {
+            Result::Ok(t) => t,
+            Result::Err(e) => {
+                eprintln!("LexerError: {:?}", e);
+                continue;
+            }
+        };
+        // dbg!(&tokens);
+        let tree = match Parser::new(tokens).parse() {
+            Result::Ok(t) => t,
+            Result::Err(e) => {
+                eprintln!("ParserError: {:?}", e);
+                continue;
+            }
+        };
+        // dbg!(&tree);
+        let value = eval(&tree);
+        match value {
+            Value::INT(i) => println!("{}", i),
+            Value::FLOAT(f) => println!("{}", f),
+        };
     }
 }
