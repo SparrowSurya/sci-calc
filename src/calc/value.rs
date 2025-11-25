@@ -1,7 +1,7 @@
 use crate::calc::common::{Float, Integer};
 use std::fmt;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum Value {
     Int(Integer),
     Float(Float),

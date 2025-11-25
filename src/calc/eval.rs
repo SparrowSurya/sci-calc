@@ -1,3 +1,4 @@
+use crate::calc::functions;
 use crate::calc::nodes::{Atom, BinOp, Expr, UnOp};
 use crate::calc::value::Value;
 
@@ -7,6 +8,7 @@ pub enum EvalErr {
     FuncNotExists(String),
     IncorrectArgumentCount(String),
     ConstNotExists(String),
+    InvalidArgument(String),
 }
 
 pub fn eval(expr: &Expr) -> Result<Value, EvalErr> {
@@ -66,6 +68,15 @@ fn eval_const(name: String) -> Result<Value, EvalErr> {
 
 fn eval_func(name: String, args: &[Value]) -> Result<Value, EvalErr> {
     match name.to_lowercase().as_str() {
+        "sin" => functions::sin(args),
+        "cos" => functions::cos(args),
+        "tan" => functions::tan(args),
+        "min" => functions::min(args),
+        "max" => functions::max(args),
+        "avg" => functions::avg(args),
+        "ceil" => functions::ceil(args),
+        "floor" => functions::floor(args),
+        "log" => functions::log(args),
         _ => Result::Err(EvalErr::FuncNotExists(name)),
     }
 }
