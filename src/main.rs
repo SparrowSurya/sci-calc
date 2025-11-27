@@ -4,6 +4,7 @@ use std::io::Write;
 use std::process;
 
 mod calc;
+mod cli;
 
 use calc::eval::{eval, EvalErr};
 use calc::functions as func;
@@ -12,34 +13,41 @@ use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
 use calc::context::Context;
+use cli::Args;
+
+use clap::Parser as _;
+use rustyline::DefaultEditor;
 
 fn main() {
+    let args = Args::parse();
     let ctx = create_default_context();
 
-    loop {
-        let input = read_user_input();
-        if input.trim().is_empty() {
-            continue;
-        }
-        let lexer = Lexer::new(input);
-        let expr = match Parser::new(lexer).parse() {
+    if let Some(expr) = args.expr {
+        match evaluate(&ctx, expr) {
+            Result::Ok(v) => println!("{}", v),
+            Result::Err(e) => eprintln!("{:?}", e),
+        };
+        return;
+    }
+
+    run_repl(&ctx);
+}
+
+fn evaluate(ctx: &Context, expr: String) -> Result<Value, String> {
+    let lexer = Lexer::new(expr);
+    let expr = match Parser::new(lexer).parse() {
             Result::Ok(t) => t,
             Result::Err(e) => {
-                eprintln!("ParserError: {:?}", e);
-                continue;
+                let msg = format!("ParserError: {:?}", e);
+                return Result::Err(String::from(msg));
             }
         };
-        let value = match eval(&ctx, &expr) {
-            Result::Ok(v) => v,
-            Result::Err(e) => {
-                eprintln!("EvalError: {:?}", e);
-                continue;
-            }
-        };
-        match value {
-            Value::Int(i) => println!("{}", i),
-            Value::Float(f) => println!("{}", f),
-        };
+    match eval(&ctx, &expr) {
+        Result::Ok(v) => Result::Ok(v),
+        Result::Err(e) => {
+            let msg = format!("EvalError: {:?}", e);
+            return Result::Err(String::from(msg));
+        }
     }
 }
 
@@ -64,6 +72,28 @@ fn read_user_input() -> String {
     };
 
     String::from(input.trim_end_matches("\n"))
+}
+
+fn run_repl(ctx: &Context) {
+    println!("Calc REPL. Use 'exit' to quit.");
+    let mut rl = DefaultEditor::new().unwrap();
+
+    loop {
+        match rl.readline("> ") {
+            Result::Ok(input) if input.trim().eq_ignore_ascii_case("exit") => break,
+            Result::Ok(input) => {
+                if input.trim().is_empty() {
+                    continue;
+                }
+                rl.add_history_entry(input.as_str()).unwrap();
+                match evaluate(ctx, input) {
+                    Result::Ok(v) => println!("{}", v),
+                    Result::Err(e) => println!("{}", e),
+                }
+            }
+            Result::Err(_) => break,
+        }
+    }
 }
 
 fn create_default_context() -> Context {

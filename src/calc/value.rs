@@ -67,6 +67,15 @@ impl Value {
     }
 }
 
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Int(v) => write!(f, "{}", v),
+            Value::Float(v) => write!(f, "{}", v),
+        }
+    }
+}
+
 impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
