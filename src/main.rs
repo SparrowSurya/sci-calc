@@ -10,14 +10,38 @@ use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
-use cli::Args;
 
 use clap::Parser as _;
 use rustyline::DefaultEditor;
 
+
 fn main() {
-    let args = Args::parse();
+    let args = cli::Args::parse();
     let ctx = create_default_context();
+
+    match args.command {
+        Some(cli::CalcCommand::Const(cmd)) => match cmd.sub {
+            cli::ConstSub::List => {
+                let values = ctx.consts
+                    .keys()
+                    .map(|k| k.to_string().to_uppercase())
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                println!("Constants: {}.", values);
+                return;
+            },
+            cli::ConstSub::Get { name } => {
+                let name = name.trim().to_lowercase();
+                let msg = match ctx.consts.get(name.as_str()) {
+                    Option::Some(value) => format!("{}", value),
+                    Option::None => format!("Constant '{}' is not defined.", name),
+                };
+                println!("{}", msg);
+                return;
+            },
+        },
+        _ => {},
+    }
 
     if let Some(expr) = args.expr {
         match evaluate(&ctx, expr) {
