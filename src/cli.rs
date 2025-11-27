@@ -20,6 +20,9 @@ pub enum CalcCommand {
 
     #[command(about = "Built-in constants")]
     Const(ConstCmd),
+
+    #[command(about = "Built-in functions")]
+    Func(FuncCmd),
 }
 
 
@@ -40,4 +43,17 @@ pub enum ConstSub {
         #[arg(help = "Name of the constant")]
         name: String,
     },
+}
+
+#[derive(Parser)]
+pub struct FuncCmd {
+    #[command(subcommand)]
+    pub sub: FuncSub,
+}
+
+#[derive(Subcommand)]
+pub enum FuncSub {
+
+    #[command(about = "List all available functions")]
+    List,
 }

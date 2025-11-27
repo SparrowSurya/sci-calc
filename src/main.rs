@@ -40,6 +40,17 @@ fn main() {
                 return;
             },
         },
+        Some(cli::CalcCommand::Func(cmd)) => match cmd.sub {
+            cli::FuncSub::List => {
+                let values = ctx.funcs
+                    .keys()
+                    .map(|k| k.to_string().to_lowercase())
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                println!("Functions: {}.", values);
+                return;
+            },
+        },
         _ => {},
     }
 
