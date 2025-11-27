@@ -1,17 +1,23 @@
+use std::collections::HashMap;
 use std::io;
 use std::io::Write;
 use std::process;
 
 mod calc;
 
-use calc::eval::eval;
+use calc::eval::{eval, EvalErr};
 use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
+use calc::functions as func;
+
+use crate::calc::context::Context;
 
 
 fn main() {
+    let ctx = create_default_context();
+
     loop {
         let input = read_user_input();
         if input.trim().is_empty() {
@@ -25,7 +31,7 @@ fn main() {
                 continue;
             }
         };
-        let value = match eval(&expr) {
+        let value = match eval(&ctx, &expr) {
             Result::Ok(v) => v,
             Result::Err(e) => {
                 eprintln!("EvalError: {:?}", e);
@@ -60,4 +66,23 @@ fn read_user_input() -> String {
     };
 
     String::from(input.trim_end_matches("\n"))
+}
+
+fn create_default_context() -> Context {
+    let mut consts: HashMap<&'static str, Value> = HashMap::new();
+    consts.insert("pi", Value::Float(std::f64::consts::PI));
+    consts.insert("e", Value::Float(std::f64::consts::E));
+
+    let mut funcs: HashMap<&'static str, fn(&[Value]) -> Result<Value, EvalErr>> = HashMap::new();
+    funcs.insert("sin", func::sin);
+    funcs.insert("cos", func::cos);
+    funcs.insert("tan", func::tan);
+    funcs.insert("min", func::min);
+    funcs.insert("max", func::max);
+    funcs.insert("avg", func::avg);
+    funcs.insert("ceil", func::ceil);
+    funcs.insert("floor", func::floor);
+    funcs.insert("log", func::log);
+
+    Context::new(consts, funcs)
 }

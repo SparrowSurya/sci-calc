@@ -8,6 +8,7 @@ pub enum Value {
 }
 
 impl Value {
+    #[allow(dead_code)]
     pub fn as_int(&self) -> Integer {
         match self {
             Value::Int(i) => *i,
