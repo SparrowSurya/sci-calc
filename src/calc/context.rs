@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-use crate::calc::value::Value;
 use crate::calc::eval::EvalErr;
-
+use crate::calc::value::Value;
+use std::collections::HashMap;
 
 pub struct Context {
     pub consts: HashMap<&'static str, Value>,
@@ -13,9 +12,6 @@ impl Context {
         consts: HashMap<&'static str, Value>,
         funcs: HashMap<&'static str, fn(&[Value]) -> Result<Value, EvalErr>>,
     ) -> Context {
-        Context {
-            consts,
-            funcs
-        }
+        Context { consts, funcs }
     }
 }

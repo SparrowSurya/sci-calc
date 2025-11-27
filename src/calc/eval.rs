@@ -1,7 +1,6 @@
+use crate::calc::context::Context;
 use crate::calc::nodes::{Atom, BinOp, Expr, UnOp};
 use crate::calc::value::Value;
-use crate::calc::context::Context;
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EvalErr {
@@ -50,7 +49,8 @@ fn eval_atom(ctx: &Context, atom: &Atom) -> Result<Value, EvalErr> {
         Atom::Float(f) => Result::Ok(Value::Float(*f)),
         Atom::Const(name) => Result::Ok(eval_const(ctx, name.to_string())?),
         Atom::Func(name, args) => {
-            let values: Vec<Value> = args.iter()
+            let values: Vec<Value> = args
+                .iter()
                 .map(|e| eval_expr(ctx, e))
                 .collect::<Result<Vec<_>, _>>()?;
             Result::Ok(eval_func(ctx, name.to_string(), &values)?)

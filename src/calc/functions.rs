@@ -1,7 +1,6 @@
 use crate::calc::common::{Float, Integer};
-use crate::calc::value::Value;
 use crate::calc::eval::EvalErr;
-
+use crate::calc::value::Value;
 
 pub fn sin(args: &[Value]) -> Result<Value, EvalErr> {
     if args.len() != 1 {
@@ -75,7 +74,9 @@ pub fn max(args: &[Value]) -> Result<Value, EvalErr> {
 
 pub fn avg(args: &[Value]) -> Result<Value, EvalErr> {
     if args.is_empty() {
-        return Err(EvalErr::IncorrectArgumentCount("expected at least 1 value".into()));
+        return Err(EvalErr::IncorrectArgumentCount(
+            "expected at least 1 value".into(),
+        ));
     }
 
     let sum: Float = args.iter().map(|v| v.as_float()).sum();
@@ -130,12 +131,12 @@ pub fn log(args: &[Value]) -> Result<Value, EvalErr> {
     let value = args[1].as_float();
 
     if base <= 0.0 || base == 1.0 {
-        return Err(EvalErr::InvalidArgument("log base must be > 0 and != 1".into()));
+        return Err(EvalErr::InvalidArgument(
+            "log base must be > 0 and != 1".into(),
+        ));
     }
     if value <= 0.0 {
-        return Err(EvalErr::InvalidArgument(
-            "log value must be > 0".into(),
-        ));
+        return Err(EvalErr::InvalidArgument("log value must be > 0".into()));
     }
 
     let result = value.log(base);

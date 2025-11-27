@@ -1,8 +1,7 @@
-use crate::calc::token::Token;
-use crate::calc::lexer::{Tokeniser, LexerErr};
 use crate::calc::common::{Float, Integer};
+use crate::calc::lexer::{LexerErr, Tokeniser};
 use crate::calc::nodes::{Atom, BinOp, Expr, UnOp};
-
+use crate::calc::token::Token;
 
 #[derive(Debug, PartialEq)]
 pub enum ParserErr {
@@ -12,7 +11,6 @@ pub enum ParserErr {
     LexerErr(LexerErr),
 }
 
-
 #[derive(Debug)]
 pub struct Parser<T: Tokeniser> {
     lexer: T,
@@ -20,7 +18,7 @@ pub struct Parser<T: Tokeniser> {
 
 impl<T> Parser<T>
 where
-    T: Tokeniser
+    T: Tokeniser,
 {
     pub fn new(lexer: T) -> Parser<T> {
         Parser { lexer }
@@ -28,17 +26,15 @@ where
 
     fn consume(&mut self) -> Result<Token, ParserErr> {
         match self.lexer.next_token() {
-            Result::Ok(t) => {
-                Result::Ok(t)
-            },
-            Result::Err(e) => Result::Err(ParserErr::LexerErr(e))
+            Result::Ok(t) => Result::Ok(t),
+            Result::Err(e) => Result::Err(ParserErr::LexerErr(e)),
         }
     }
 
     fn peek(&mut self) -> Result<Token, ParserErr> {
         match self.lexer.peek_token() {
             Result::Ok(t) => Result::Ok(t),
-            Result::Err(e) => Result::Err(ParserErr::LexerErr(e))
+            Result::Err(e) => Result::Err(ParserErr::LexerErr(e)),
         }
     }
 
@@ -67,11 +63,7 @@ where
             }
             Token::Plus(_) => Expr::UnOp(UnOp::Pos, Box::new(self.parse_unary()?)),
             Token::Minus(_) => Expr::UnOp(UnOp::Neg, Box::new(self.parse_unary()?)),
-            _ => {
-                return Result::Err(ParserErr::SyntaxError(
-                    "SyntaxError".to_string(),
-                ))
-            }
+            _ => return Result::Err(ParserErr::SyntaxError("SyntaxError".to_string())),
         };
 
         loop {
@@ -86,9 +78,7 @@ where
                 Token::Comma(_) => break,
                 Token::Rparen(_) => break,
                 _ => {
-                    return Result::Err(ParserErr::SyntaxError(
-                        "expected operator".to_string(),
-                    ));
+                    return Result::Err(ParserErr::SyntaxError("expected operator".to_string()));
                 }
             };
 
@@ -115,9 +105,7 @@ where
     fn parse_float(&self, value: String) -> Result<Atom, ParserErr> {
         match value.parse::<Float>() {
             Result::Ok(v) => Result::Ok(Atom::Float(v)),
-            Result::Err(e) => {
-                Result::Err(ParserErr::ParseFloatError(e.to_string()))
-            }
+            Result::Err(e) => Result::Err(ParserErr::ParseFloatError(e.to_string())),
         }
     }
 
@@ -140,9 +128,7 @@ where
                 }
                 Result::Ok(args)
             }
-            _ => Result::Err(ParserErr::SyntaxError(
-                "SyntaxError".to_string(),
-            )),
+            _ => Result::Err(ParserErr::SyntaxError("SyntaxError".to_string())),
         }
     }
 
@@ -158,9 +144,7 @@ where
                 let expr = self.parse_expr(0.0)?;
                 match self.consume()? {
                     Token::Rparen(_) => Result::Ok(expr),
-                    _ => Result::Err(ParserErr::SyntaxError(
-                        "expected ')'".to_string(),
-                    )),
+                    _ => Result::Err(ParserErr::SyntaxError("expected ')'".to_string())),
                 }
             }
             Token::Plus(_) => Result::Ok(Expr::UnOp(UnOp::Pos, Box::new(self.parse_unary()?))),

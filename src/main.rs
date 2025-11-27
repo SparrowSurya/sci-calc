@@ -6,14 +6,12 @@ use std::process;
 mod calc;
 
 use calc::eval::{eval, EvalErr};
+use calc::functions as func;
 use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
-use calc::functions as func;
-
-use crate::calc::context::Context;
-
+use calc::context::Context;
 
 fn main() {
     let ctx = create_default_context();
@@ -36,7 +34,7 @@ fn main() {
             Result::Err(e) => {
                 eprintln!("EvalError: {:?}", e);
                 continue;
-            },
+            }
         };
         match value {
             Value::Int(i) => println!("{}", i),

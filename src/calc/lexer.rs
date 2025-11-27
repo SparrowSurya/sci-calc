@@ -1,20 +1,17 @@
 use crate::Token;
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum LexerErr {
     IllegalChar(char, usize),
 }
-
 
 pub trait Tokeniser {
     fn next_token(&mut self) -> Result<Token, LexerErr>;
     fn peek_token(&mut self) -> Result<Token, LexerErr>;
 }
 
-
 #[derive(Debug)]
-pub struct Lexer{
+pub struct Lexer {
     expr: String,
     cursor: usize,
     next: Option<Result<Token, LexerErr>>,
@@ -196,19 +193,46 @@ mod tests {
 
     #[test]
     fn tokenise_valid_operators() {
-        assert_eq!(tokenise("+".to_string()), Ok(vec![Token::Plus(0), Token::Eof(1)]));
-        assert_eq!(tokenise("-".to_string()), Ok(vec![Token::Minus(0), Token::Eof(1)]));
-        assert_eq!(tokenise("*".to_string()), Ok(vec![Token::Mul(0), Token::Eof(1)]));
-        assert_eq!(tokenise("/".to_string()), Ok(vec![Token::Div(0), Token::Eof(1)]));
-        assert_eq!(tokenise("%".to_string()), Ok(vec![Token::Mod(0), Token::Eof(1)]));
-        assert_eq!(tokenise("^".to_string()), Ok(vec![Token::Pow(0), Token::Eof(1)]));
+        assert_eq!(
+            tokenise("+".to_string()),
+            Ok(vec![Token::Plus(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("-".to_string()),
+            Ok(vec![Token::Minus(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("*".to_string()),
+            Ok(vec![Token::Mul(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("/".to_string()),
+            Ok(vec![Token::Div(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("%".to_string()),
+            Ok(vec![Token::Mod(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("^".to_string()),
+            Ok(vec![Token::Pow(0), Token::Eof(1)])
+        );
     }
 
     #[test]
     fn tokenise_valid_delimiters() {
-        assert_eq!(tokenise("(".to_string()), Ok(vec![Token::Lparen(0), Token::Eof(1)]));
-        assert_eq!(tokenise(")".to_string()), Ok(vec![Token::Rparen(0), Token::Eof(1)]));
-        assert_eq!(tokenise(",".to_string()), Ok(vec![Token::Comma(0), Token::Eof(1)]));
+        assert_eq!(
+            tokenise("(".to_string()),
+            Ok(vec![Token::Lparen(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise(")".to_string()),
+            Ok(vec![Token::Rparen(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise(",".to_string()),
+            Ok(vec![Token::Comma(0), Token::Eof(1)])
+        );
     }
 
     #[test]

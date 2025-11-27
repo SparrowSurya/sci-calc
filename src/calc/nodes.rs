@@ -60,10 +60,10 @@ impl fmt::Debug for Expr {
         match self {
             Expr::UnOp(op, expr) => {
                 write!(f, "({:?}{:?})", op, expr)
-            },
+            }
             Expr::BinOp(op, left, right) => {
                 write!(f, "({:?} {:?} {:?})", left, op, right)
-            },
+            }
             Expr::Atom(a) => write!(f, "{:?}", a),
         }
     }
