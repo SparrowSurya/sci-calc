@@ -1,18 +1,15 @@
 use std::collections::HashMap;
-use std::io;
-use std::io::Write;
-use std::process;
 
 mod calc;
 mod cli;
 
+use calc::context::Context;
 use calc::eval::{eval, EvalErr};
 use calc::functions as func;
 use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
 use calc::value::Value;
-use calc::context::Context;
 use cli::Args;
 
 use clap::Parser as _;
@@ -36,12 +33,12 @@ fn main() {
 fn evaluate(ctx: &Context, expr: String) -> Result<Value, String> {
     let lexer = Lexer::new(expr);
     let expr = match Parser::new(lexer).parse() {
-            Result::Ok(t) => t,
-            Result::Err(e) => {
-                let msg = format!("ParserError: {:?}", e);
-                return Result::Err(String::from(msg));
-            }
-        };
+        Result::Ok(t) => t,
+        Result::Err(e) => {
+            let msg = format!("ParserError: {:?}", e);
+            return Result::Err(String::from(msg));
+        }
+    };
     match eval(&ctx, &expr) {
         Result::Ok(v) => Result::Ok(v),
         Result::Err(e) => {
@@ -49,29 +46,6 @@ fn evaluate(ctx: &Context, expr: String) -> Result<Value, String> {
             return Result::Err(String::from(msg));
         }
     }
-}
-
-fn read_user_input() -> String {
-    let mut input = String::new();
-
-    print!("> ");
-    match io::stdout().flush() {
-        Ok(x) => x,
-        Err(e) => {
-            println!("failed to flush stdout: {}", e);
-            process::exit(1);
-        }
-    };
-
-    match io::stdin().read_line(&mut input) {
-        Ok(x) => x,
-        Err(e) => {
-            println!("failed to read from stdin: {}", e);
-            process::exit(1);
-        }
-    };
-
-    String::from(input.trim_end_matches("\n"))
 }
 
 fn run_repl(ctx: &Context) {
