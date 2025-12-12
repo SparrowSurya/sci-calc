@@ -126,8 +126,13 @@ impl Lexer {
         }
 
         if ch == '*' {
-            self.advance();
-            return Ok(Token::Mul(start));
+            return match self.advance() {
+                '*' => {
+                    self.advance();
+                    return Ok(Token::Pow(start));
+                },
+                _ => Ok(Token::Mul(start)),
+            };
         }
 
         if ch == '/' {
