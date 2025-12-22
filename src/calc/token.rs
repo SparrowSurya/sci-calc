@@ -2,7 +2,7 @@ use std::fmt;
 
 #[derive(PartialEq, Clone)]
 pub enum Token {
-    Int(String, usize),
+    Int(String, u32, usize),
     Float(String, usize),
     Name(String, usize),
     Plus(usize),
@@ -20,7 +20,7 @@ pub enum Token {
 impl fmt::Debug for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Token::Int(s, _) => write!(f, "Token::Int({})", s),
+            Token::Int(s, radix, _) => write!(f, "Token::Int({}, radix={})", s, radix),
             Token::Float(s, _) => write!(f, "Token::FLOAT({})", s),
             Token::Name(s, _) => write!(f, "Token::NAME({})", s),
 

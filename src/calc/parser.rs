@@ -44,7 +44,7 @@ where
 
     fn parse_expr(&mut self, min_bp: f32) -> Result<Expr, ParserErr> {
         let mut lhs = match self.consume()? {
-            Token::Int(v, _) => Expr::Atom(self.parse_int(v)?),
+            Token::Int(v, radix, _) => Expr::Atom(self.parse_int(v, radix)?),
             Token::Float(v, _) => Expr::Atom(self.parse_float(v)?),
             Token::Name(v, _) => match self.peek()? {
                 Token::Lparen(_) => Expr::Atom(Atom::Func(v, self.parse_args()?)),
@@ -95,9 +95,9 @@ where
         Result::Ok(lhs)
     }
 
-    fn parse_int(&self, value: String) -> Result<Atom, ParserErr> {
-        match value.parse::<Integer>() {
-            Result::Ok(v) => Result::Ok(Atom::Int(v)),
+    fn parse_int(&self, value: String, radix: u32) -> Result<Atom, ParserErr> {
+        match usize::from_str_radix(value.as_str(), radix) {
+            Result::Ok(v) => Result::Ok(Atom::Int(v as Integer)),
             Result::Err(e) => Result::Err(ParserErr::ParseIntError(e.to_string())),
         }
     }
@@ -134,7 +134,7 @@ where
 
     fn parse_unary(&mut self) -> Result<Expr, ParserErr> {
         match self.consume()? {
-            Token::Int(v, _) => Result::Ok(Expr::Atom(self.parse_int(v)?)),
+            Token::Int(v, radix, _) => Result::Ok(Expr::Atom(self.parse_int(v, radix)?)),
             Token::Float(v, _) => Result::Ok(Expr::Atom(self.parse_float(v)?)),
             Token::Name(v, _) => match self.peek()? {
                 Token::Lparen(_) => Result::Ok(Expr::Atom(Atom::Func(v, self.parse_args()?))),

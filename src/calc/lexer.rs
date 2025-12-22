@@ -3,6 +3,7 @@ use crate::Token;
 #[derive(Debug, Clone, PartialEq)]
 pub enum LexerErr {
     IllegalChar(char, usize),
+    IncompleteValue(usize),
 }
 
 pub trait Tokeniser {
@@ -75,6 +76,23 @@ impl Lexer {
         let start = self.cursor;
 
         if ch.is_digit(10) {
+
+            let _ch = self.peek_char();
+            let _radix = if ch == '0' { self.read_radix(_ch) } else { Option::None };
+            if let Option::Some(r) = _radix {
+                self.advance();
+                ch = self.advance();
+                while ch.is_digit(r) {
+                    ch = self.advance();
+                }
+
+                let value = &self.expr[start+2..self.cursor];
+                if value.is_empty() {
+                    return Err(LexerErr::IncompleteValue(self.cursor))
+                }
+                return Ok(Token::Int(value.to_string(), r, start));
+            }
+
             ch = self.advance();
             while ch.is_digit(10) {
                 ch = self.advance();
@@ -82,7 +100,7 @@ impl Lexer {
 
             if ch != '.' && ch != 'e' && ch != 'E' {
                 let value = &self.expr[start..self.cursor];
-                return Ok(Token::Int(value.to_string(), start));
+                return Ok(Token::Int(value.to_string(), 10, start));
             }
 
             if ch == '.' {
@@ -176,6 +194,19 @@ impl Lexer {
         self.expr.chars().nth(self.cursor).unwrap_or('\0')
     }
 
+    fn read_radix(&self, ch: char) -> Option<u32> {
+        match ch {
+            'b' | 'B' => Option::Some(2),
+            'o' | 'O' => Option::Some(8),
+            'x' | 'X' => Option::Some(16),
+            _ => Option::None,
+        }
+    }
+
+    fn peek_char(&mut self) -> char {
+        self.expr.chars().nth(self.cursor+1).unwrap_or('\0')
+    }
+
     fn advance(&mut self) -> char {
         if self.cursor >= self.expr.len() {
             return '\0';
@@ -244,15 +275,15 @@ mod tests {
     fn tokenise_valid_integer() {
         assert_eq!(
             tokenise("23".to_string()),
-            Ok(vec![Token::Int("23".to_string(), 0), Token::Eof(2)])
+            Ok(vec![Token::Int("23".to_string(), 10, 0), Token::Eof(2)])
         );
         assert_eq!(
             tokenise("0023".to_string()),
-            Ok(vec![Token::Int("0023".to_string(), 0), Token::Eof(4)])
+            Ok(vec![Token::Int("0023".to_string(), 10, 0), Token::Eof(4)])
         );
         assert_eq!(
             tokenise("0230".to_string()),
-            Ok(vec![Token::Int("0230".to_string(), 0), Token::Eof(4)])
+            Ok(vec![Token::Int("0230".to_string(), 10, 0), Token::Eof(4)])
         );
     }
 
