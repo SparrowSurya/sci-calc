@@ -8,6 +8,7 @@ pub enum EvalErr {
     IncorrectArgumentCount(String),
     ConstNotExists(String),
     InvalidArgument(String),
+    InvalidFloatingPointOperation(String),
 }
 
 pub fn eval(ctx: &Context, expr: &Expr) -> Result<Value, EvalErr> {
@@ -26,6 +27,7 @@ fn eval_unop(ctx: &Context, op: &UnOp, expr: &Expr) -> Result<Value, EvalErr> {
     match op {
         UnOp::Neg => Result::Ok(eval_expr(ctx, expr)?.neg()),
         UnOp::Pos => Result::Ok(eval_expr(ctx, expr)?),
+        UnOp::Not => Result::Ok(eval_expr(ctx, expr)?.not(ctx)?),
     }
 }
 
@@ -40,6 +42,9 @@ fn eval_binop(ctx: &Context, op: &BinOp, lhs: &Expr, rhs: &Expr) -> Result<Value
         BinOp::Div => Result::Ok(lvalue.div(rvalue)),
         BinOp::Mod => Result::Ok(lvalue.rem(rvalue)),
         BinOp::Pow => Result::Ok(lvalue.pow(rvalue)),
+        BinOp::And => Result::Ok(lvalue.and(rvalue, ctx)?),
+        BinOp::Or => Result::Ok(lvalue.or(rvalue, ctx)?),
+        BinOp::Xor => Result::Ok(lvalue.xor(rvalue, ctx)?),
     }
 }
 

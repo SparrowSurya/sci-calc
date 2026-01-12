@@ -1,4 +1,6 @@
 use crate::calc::common::{Float, Integer};
+use crate::calc::context::Context;
+use crate::calc::eval::EvalErr;
 use std::fmt;
 
 #[derive(Clone, PartialEq)]
@@ -8,7 +10,6 @@ pub enum Value {
 }
 
 impl Value {
-    #[allow(dead_code)]
     pub fn as_int(&self) -> Integer {
         match self {
             Value::Int(i) => *i,
@@ -63,6 +64,59 @@ impl Value {
         match self {
             Value::Int(i) => Value::Int(-i),
             Value::Float(f) => Value::Float(-f),
+        }
+    }
+
+    pub fn not(self, ctx: &Context) -> Result<Value, EvalErr> {
+        if let Value::Int(i) = self {
+            return Result::Ok(Value::Int(!i));
+        }
+
+        if ctx.allow_floating_bitwise_operations {
+            return Result::Ok(Value::Int(self.as_int()));
+        }
+
+        Result::Err(EvalErr::InvalidFloatingPointOperation(
+            "Bitwise operator cannot be operated on floating point numbers".to_string()
+        ))
+    }
+
+    pub fn and(self, rhs: Value, ctx: &Context) -> Result<Value, EvalErr> {
+        let allow_fp_bw_ops = ctx.allow_floating_bitwise_operations;
+        match (&self, &rhs) {
+            (&Value::Int(i1), &Value::Int(i2)) => Result::Ok(Value::Int(i1 & i2)),
+            (&Value::Int(i), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(i & rhs.as_int())),
+            (&Value::Float(_), &Value::Int(i)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() & i)),
+            (&Value::Float(_), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() & rhs.as_int())),
+            _ => Result::Err(EvalErr::InvalidFloatingPointOperation(
+                "Bitwise operator cannot be operated on floating point numbers".to_string()
+            ))
+        }
+    }
+
+    pub fn or(self, rhs: Value, ctx: &Context) -> Result<Value, EvalErr> {
+        let allow_fp_bw_ops = ctx.allow_floating_bitwise_operations;
+        match (&self, &rhs) {
+            (&Value::Int(i1), &Value::Int(i2)) => Result::Ok(Value::Int(i1 | i2)),
+            (&Value::Int(i), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(i | rhs.as_int())),
+            (&Value::Float(_), &Value::Int(i)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() | i)),
+            (&Value::Float(_), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() | rhs.as_int())),
+            _ => Result::Err(EvalErr::InvalidFloatingPointOperation(
+                "Bitwise operator cannot be operated on floating point numbers".to_string()
+            ))
+        }
+    }
+
+    pub fn xor(self, rhs: Value, ctx: &Context) -> Result<Value, EvalErr> {
+        let allow_fp_bw_ops = ctx.allow_floating_bitwise_operations;
+        match (&self, &rhs) {
+            (&Value::Int(i1), &Value::Int(i2)) => Result::Ok(Value::Int(i1 ^ i2)),
+            (&Value::Int(i), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(i ^ rhs.as_int())),
+            (&Value::Float(_), &Value::Int(i)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() ^ i)),
+            (&Value::Float(_), &Value::Float(_)) if allow_fp_bw_ops => Result::Ok(Value::Int(self.as_int() ^ rhs.as_int())),
+            _ => Result::Err(EvalErr::InvalidFloatingPointOperation(
+                "Bitwise operator cannot be operated on floating point numbers".to_string()
+            ))
         }
     }
 }

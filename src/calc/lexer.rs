@@ -3,7 +3,7 @@ use crate::Token;
 #[derive(Debug, Clone, PartialEq)]
 pub enum LexerErr {
     IllegalChar(char, usize),
-    IncompleteValue(usize),
+    InvalidValue(usize),
 }
 
 pub trait Tokeniser {
@@ -88,7 +88,7 @@ impl Lexer {
 
                 let value = &self.expr[start+2..self.cursor];
                 if value.is_empty() {
-                    return Err(LexerErr::IncompleteValue(self.cursor))
+                    return Err(LexerErr::InvalidValue(self.cursor))
                 }
                 return Ok(Token::Int(value.to_string(), r, start));
             }
@@ -163,9 +163,24 @@ impl Lexer {
             return Ok(Token::Mod(start));
         }
 
+        if ch == '&' {
+            self.advance();
+            return Ok(Token::And(start));
+        }
+
+        if ch == '|' {
+            self.advance();
+            return Ok(Token::Or(start));
+        }
+
+        if ch == '~' {
+            self.advance();
+            return Ok(Token::Not(start));
+        }
+
         if ch == '^' {
             self.advance();
-            return Ok(Token::Pow(start));
+            return Ok(Token::Xor(start));
         }
 
         if ch == ',' {
@@ -250,8 +265,24 @@ mod tests {
             Ok(vec![Token::Mod(0), Token::Eof(1)])
         );
         assert_eq!(
-            tokenise("^".to_string()),
+            tokenise("**".to_string()),
             Ok(vec![Token::Pow(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("&".to_string()),
+            Ok(vec![Token::And(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("|".to_string()),
+            Ok(vec![Token::Or(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("~".to_string()),
+            Ok(vec![Token::Not(0), Token::Eof(1)])
+        );
+        assert_eq!(
+            tokenise("^".to_string()),
+            Ok(vec![Token::Xor(0), Token::Eof(1)])
         );
     }
 

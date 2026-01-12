@@ -5,6 +5,7 @@ use std::fmt;
 pub enum UnOp {
     Pos,
     Neg,
+    Not,
 }
 
 #[derive(Clone, PartialEq)]
@@ -15,6 +16,9 @@ pub enum BinOp {
     Div,
     Mod,
     Pow,
+    And,
+    Or,
+    Xor,
 }
 
 #[derive(Clone, PartialEq)]
@@ -37,6 +41,7 @@ impl fmt::Debug for UnOp {
         match self {
             UnOp::Neg => write!(f, "-"),
             UnOp::Pos => write!(f, "+"),
+            UnOp::Not => write!(f, "~"),
         }
     }
 }
@@ -49,7 +54,10 @@ impl fmt::Debug for BinOp {
             BinOp::Mul => "*",
             BinOp::Div => "/",
             BinOp::Mod => "%",
-            BinOp::Pow => "^",
+            BinOp::Pow => "**",
+            BinOp::And => "&",
+            BinOp::Or => "|",
+            BinOp::Xor => "^",
         };
         write!(f, "{}", sym)
     }

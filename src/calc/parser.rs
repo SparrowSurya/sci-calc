@@ -63,6 +63,7 @@ where
             }
             Token::Plus(_) => Expr::UnOp(UnOp::Pos, Box::new(self.parse_unary()?)),
             Token::Minus(_) => Expr::UnOp(UnOp::Neg, Box::new(self.parse_unary()?)),
+            Token::Not(_) => Expr::UnOp(UnOp::Not, Box::new(self.parse_unary()?)),
             _ => return Result::Err(ParserErr::SyntaxError("SyntaxError".to_string())),
         };
 
@@ -74,6 +75,9 @@ where
                 Token::Div(_) => BinOp::Div,
                 Token::Mod(_) => BinOp::Mod,
                 Token::Pow(_) => BinOp::Pow,
+                Token::And(_) => BinOp::And,
+                Token::Or(_) => BinOp::Or,
+                Token::Xor(_) => BinOp::Xor,
                 Token::Eof(_) => break,
                 Token::Comma(_) => break,
                 Token::Rparen(_) => break,
@@ -149,6 +153,7 @@ where
             }
             Token::Plus(_) => Result::Ok(Expr::UnOp(UnOp::Pos, Box::new(self.parse_unary()?))),
             Token::Minus(_) => Result::Ok(Expr::UnOp(UnOp::Neg, Box::new(self.parse_unary()?))),
+            Token::Not(_) => Result::Ok(Expr::UnOp(UnOp::Not, Box::new(self.parse_unary()?))),
             _ => Result::Err(ParserErr::SyntaxError(
                 "expected primary expression".to_string(),
             )),
@@ -157,9 +162,12 @@ where
 
     fn infix_binding_power(&self, op: BinOp) -> (f32, f32) {
         match op {
-            BinOp::Plus | BinOp::Minus => (1.0, 1.1),
-            BinOp::Mul | BinOp::Div | BinOp::Mod => (2.0, 2.1),
-            BinOp::Pow => (3.1, 3.0),
+            BinOp::Xor => (1.0, 1.1),
+            BinOp::Or => (2.0, 2.1),
+            BinOp::And => (3.0, 3.1),
+            BinOp::Plus | BinOp::Minus => (4.0, 4.1),
+            BinOp::Mul | BinOp::Div | BinOp::Mod => (5.0, 5.1),
+            BinOp::Pow => (6.1, 6.0),
         }
     }
 }

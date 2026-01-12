@@ -1,10 +1,19 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ArgAction};
 
 
 #[derive(Parser)]
 #[command(name = "calc")]
 #[command(about = "A command-line calculator powered by Rust evaluator engine.")]
 pub struct Args {
+
+    #[arg(
+        short = 'B',
+        long,
+        help = "allow type conversion when using bitwise with floating point number",
+        action = ArgAction::SetTrue,
+        default_value_t = false,
+    )]
+    pub allow_floating_bitwise_operation: bool,
 
     #[arg(help = "expression to evaluate (omit this to open REPL)")]
     pub expr: Option<String>,

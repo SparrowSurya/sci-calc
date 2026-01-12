@@ -17,7 +17,7 @@ use rustyline::DefaultEditor;
 
 fn main() {
     let args = cli::Args::parse();
-    let ctx = create_default_context();
+    let ctx = create_default_context(args.allow_floating_bitwise_operation);
 
     match args.command {
         Some(cli::CalcCommand::Const(cmd)) => match cmd.sub {
@@ -105,7 +105,9 @@ fn run_repl(ctx: &Context) {
     }
 }
 
-fn create_default_context() -> Context {
+fn create_default_context(
+    allow_floating_bitwise_operations: bool,
+) -> Context {
     let mut consts: HashMap<&'static str, Value> = HashMap::new();
     consts.insert("pi", Value::Float(std::f64::consts::PI));
     consts.insert("e", Value::Float(std::f64::consts::E));
@@ -121,5 +123,5 @@ fn create_default_context() -> Context {
     funcs.insert("floor", func::floor);
     funcs.insert("log", func::log);
 
-    Context::new(consts, funcs)
+    Context::new(consts, funcs, allow_floating_bitwise_operations)
 }
