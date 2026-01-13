@@ -10,6 +10,13 @@ pub enum Value {
 }
 
 impl Value {
+    pub fn from_string(s: String) -> Option<Value> {
+        match s.parse::<Float>() {
+            Result::Ok(v) => Option::Some(Value::Float(v)),
+            Result::Err(_) => Option::None,
+        }
+    }
+
     pub fn as_int(&self) -> Integer {
         match self {
             Value::Int(i) => *i,

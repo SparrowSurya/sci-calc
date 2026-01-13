@@ -105,13 +105,22 @@ fn run_repl(ctx: &Context) {
 }
 
 fn create_context(args: &cli::Args) -> Context {
+    let builtin_constants = builtin_consts();
+    let builtin_constants = builtin_constants.keys().cloned().collect::<Vec<String>>();
+
     let mut consts = builtin_consts();
-    for c_name in &args.ignore_const {
+    for c_name in &args.ignore_consts {
         consts.remove(c_name);
     }
 
+    for (c_name, value) in &args.extra_consts {
+        if !builtin_constants.contains(c_name) || args.overwrite {
+            consts.insert((*c_name).clone(), (*value).clone());
+        }
+    }
+
     let mut funcs = builtin_funcs();
-    for fn_name in &args.ignore_func {
+    for fn_name in &args.ignore_funcs {
         funcs.remove(fn_name);
     }
 
