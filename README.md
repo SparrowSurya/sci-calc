@@ -1,7 +1,6 @@
 # Scientific Calculator
 
 UPCOMING-FEATURES:
-* [CLI] allowed/disabled functions or constants
 * base N
 * [CLI] external constants values
 * [CLI/REPL] override existing constant value

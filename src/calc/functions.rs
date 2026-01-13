@@ -1,8 +1,30 @@
+use std::collections::HashMap;
+
+
 use crate::calc::common::{Float, Integer};
-use crate::calc::eval::EvalErr;
+use crate::calc::eval::{EvalResult, EvalErr};
 use crate::calc::value::Value;
 
-pub fn sin(args: &[Value]) -> Result<Value, EvalErr> {
+
+pub type FuncArg = [Value];
+pub type FuncHandle = fn (&FuncArg) -> EvalResult;
+
+
+pub fn builtin_funcs() -> HashMap<String, FuncHandle> {
+    let mut hashmap: HashMap<String, FuncHandle> = HashMap::new();
+    hashmap.insert("sin".into(), sin);
+    hashmap.insert("cos".into(), cos);
+    hashmap.insert("tan".into(), tan);
+    hashmap.insert("min".into(), min);
+    hashmap.insert("max".into(), max);
+    hashmap.insert("avg".into(), avg);
+    hashmap.insert("ceil".into(), ceil);
+    hashmap.insert("floor".into(), floor);
+    hashmap.insert("log".into(), log);
+    return hashmap;
+}
+
+pub fn sin(args: &FuncArg) -> EvalResult {
     if args.len() != 1 {
         let msg = format!("expected 1, got {}", args.len());
         return Result::Err(EvalErr::IncorrectArgumentCount(msg));
@@ -12,7 +34,7 @@ pub fn sin(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(x.as_float().sin()))
 }
 
-pub fn cos(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn cos(args: &FuncArg) -> EvalResult {
     if args.len() != 1 {
         let msg = format!("expected 1, got {}", args.len());
         return Result::Err(EvalErr::IncorrectArgumentCount(msg));
@@ -22,7 +44,7 @@ pub fn cos(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(x.as_float().cos()))
 }
 
-pub fn tan(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn tan(args: &FuncArg) -> EvalResult {
     if args.len() != 1 {
         let msg = format!("expected 1, got {}", args.len());
         return Result::Err(EvalErr::IncorrectArgumentCount(msg));
@@ -32,7 +54,7 @@ pub fn tan(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(x.as_float().tan()))
 }
 
-pub fn min(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn min(args: &FuncArg) -> EvalResult {
     if args.len() < 2 {
         let msg = format!("expected at least 2 values, got {}", args.len());
         return Err(EvalErr::IncorrectArgumentCount(msg));
@@ -52,7 +74,7 @@ pub fn min(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok((*min_val).clone())
 }
 
-pub fn max(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn max(args: &FuncArg) -> EvalResult {
     if args.len() < 2 {
         let msg = format!("expected at least 2 values, got {}", args.len());
         return Err(EvalErr::IncorrectArgumentCount(msg));
@@ -72,7 +94,7 @@ pub fn max(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok((*max_val).clone())
 }
 
-pub fn avg(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn avg(args: &FuncArg) -> EvalResult {
     if args.is_empty() {
         return Err(EvalErr::IncorrectArgumentCount(
             "expected at least 1 value".into(),
@@ -89,7 +111,7 @@ pub fn avg(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(avg))
 }
 
-pub fn ceil(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn ceil(args: &FuncArg) -> EvalResult {
     if args.len() != 1 {
         let msg = format!("expected 1 value, got {}", args.len());
         return Err(EvalErr::IncorrectArgumentCount(msg));
@@ -105,7 +127,7 @@ pub fn ceil(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(c))
 }
 
-pub fn floor(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn floor(args: &FuncArg) -> EvalResult {
     if args.len() != 1 {
         let msg = format!("expected 1 value, got {}", args.len());
         return Err(EvalErr::IncorrectArgumentCount(msg));
@@ -121,7 +143,7 @@ pub fn floor(args: &[Value]) -> Result<Value, EvalErr> {
     Result::Ok(Value::Float(f))
 }
 
-pub fn log(args: &[Value]) -> Result<Value, EvalErr> {
+pub fn log(args: &FuncArg) -> EvalResult {
     if args.len() != 2 {
         let msg = format!("expected 2, got {}", args.len());
         return Err(EvalErr::IncorrectArgumentCount(msg));

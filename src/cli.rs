@@ -15,6 +15,20 @@ pub struct Args {
     )]
     pub allow_floating_bitwise_operation: bool,
 
+    #[arg(
+        long = "ignore-func",
+        help = "disallowed builtin functions",
+        num_args = 1..,
+    )]
+    pub ignore_func: Vec<String>,
+
+    #[arg(
+        long = "ignore-const",
+        help = "disallowed builtin constants",
+        num_args = 1..,
+    )]
+    pub ignore_const: Vec<String>,
+
     #[arg(help = "expression to evaluate (omit this to open REPL)")]
     pub expr: Option<String>,
 

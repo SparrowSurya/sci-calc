@@ -2,6 +2,7 @@ pub mod common;
 pub mod context;
 pub mod eval;
 pub mod functions;
+pub mod constants;
 pub mod lexer;
 pub mod nodes;
 pub mod parser;

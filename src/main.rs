@@ -1,11 +1,10 @@
-use std::collections::HashMap;
-
 mod calc;
 mod cli;
 
 use calc::context::Context;
-use calc::eval::{eval, EvalErr};
-use calc::functions as func;
+use calc::eval::eval;
+use calc::functions::builtin_funcs;
+use calc::constants::builtin_consts;
 use calc::lexer::Lexer;
 use calc::parser::Parser;
 use calc::token::Token;
@@ -17,7 +16,7 @@ use rustyline::DefaultEditor;
 
 fn main() {
     let args = cli::Args::parse();
-    let ctx = create_default_context(args.allow_floating_bitwise_operation);
+    let ctx = create_context(&args);
 
     match args.command {
         Some(cli::CalcCommand::Const(cmd)) => match cmd.sub {
@@ -105,23 +104,20 @@ fn run_repl(ctx: &Context) {
     }
 }
 
-fn create_default_context(
-    allow_floating_bitwise_operations: bool,
-) -> Context {
-    let mut consts: HashMap<&'static str, Value> = HashMap::new();
-    consts.insert("pi", Value::Float(std::f64::consts::PI));
-    consts.insert("e", Value::Float(std::f64::consts::E));
+fn create_context(args: &cli::Args) -> Context {
+    let mut consts = builtin_consts();
+    for c_name in &args.ignore_const {
+        consts.remove(c_name);
+    }
 
-    let mut funcs: HashMap<&'static str, fn(&[Value]) -> Result<Value, EvalErr>> = HashMap::new();
-    funcs.insert("sin", func::sin);
-    funcs.insert("cos", func::cos);
-    funcs.insert("tan", func::tan);
-    funcs.insert("min", func::min);
-    funcs.insert("max", func::max);
-    funcs.insert("avg", func::avg);
-    funcs.insert("ceil", func::ceil);
-    funcs.insert("floor", func::floor);
-    funcs.insert("log", func::log);
+    let mut funcs = builtin_funcs();
+    for fn_name in &args.ignore_func {
+        funcs.remove(fn_name);
+    }
 
-    Context::new(consts, funcs, allow_floating_bitwise_operations)
+    Context {
+        consts,
+        funcs,
+        allow_floating_bitwise_operations: args.allow_floating_bitwise_operation,
+    }
 }
