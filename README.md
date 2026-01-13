@@ -2,8 +2,7 @@
 
 UPCOMING-FEATURES:
 * base N
-* [CLI] external constants values
-* [CLI/REPL] override existing constant value
+* [REPL] override existing constant value
 * factorial operator
 * case based constants (NOTE: Required for physics constants)
 * more functions and constants (combinatorics, angles, physics constants)
