@@ -1,8 +1,6 @@
 # Scientific Calculator
 
 UPCOMING-FEATURES:
-* [FUNC] base N
-* [EXTRA] more functions and constants (combinatorics, angles, physics constants)
 * [FEAT] factorial operator
 * [REPL] override existing constant value
 * [REPL] REPL commands
@@ -30,3 +28,5 @@ MAYBE:
 * differentials
 * integrals
 
+SYNTAX-DETAIL-PENDING:
+* [FUNC] base N

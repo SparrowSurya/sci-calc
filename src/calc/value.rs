@@ -24,6 +24,17 @@ impl Value {
         }
     }
 
+    pub fn auto(f: Float) -> Value {
+        if f.fract() == 0.0 {
+            return Value::Int(f as Integer);
+        }
+        Value::Float(f)
+    }
+
+    pub fn zero() -> Value {
+        Value::Int(0)
+    }
+
     pub fn as_int(&self) -> Integer {
         match self {
             Value::Int(i) => *i,

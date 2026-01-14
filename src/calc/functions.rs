@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 
-use crate::calc::common::{Float, Integer};
+use crate::calc::common::{Integer, Float};
 use crate::calc::eval::{EvalResult, EvalErr};
 use crate::calc::value::Value;
 
@@ -21,6 +21,11 @@ pub fn builtin_funcs() -> HashMap<String, FuncHandle> {
     hashmap.insert("ceil".into(), ceil);
     hashmap.insert("floor".into(), floor);
     hashmap.insert("log".into(), log);
+    hashmap.insert("deg".into(), deg);
+    hashmap.insert("rad".into(), rad);
+    hashmap.insert("fact".into(), fact);
+    hashmap.insert("ncr".into(), ncr);
+    hashmap.insert("npr".into(), npr);
     return hashmap;
 }
 
@@ -31,7 +36,7 @@ pub fn sin(args: &FuncArg) -> EvalResult {
     }
 
     let x = &(args[0]);
-    Result::Ok(Value::Float(x.as_float().sin()))
+    Result::Ok(Value::auto(x.as_float().sin()))
 }
 
 pub fn cos(args: &FuncArg) -> EvalResult {
@@ -41,7 +46,7 @@ pub fn cos(args: &FuncArg) -> EvalResult {
     }
 
     let x = &(args[0]);
-    Result::Ok(Value::Float(x.as_float().cos()))
+    Result::Ok(Value::auto(x.as_float().cos()))
 }
 
 pub fn tan(args: &FuncArg) -> EvalResult {
@@ -51,7 +56,7 @@ pub fn tan(args: &FuncArg) -> EvalResult {
     }
 
     let x = &(args[0]);
-    Result::Ok(Value::Float(x.as_float().tan()))
+    Result::Ok(Value::auto(x.as_float().tan()))
 }
 
 pub fn min(args: &FuncArg) -> EvalResult {
@@ -103,12 +108,7 @@ pub fn avg(args: &FuncArg) -> EvalResult {
 
     let sum: Float = args.iter().map(|v| v.as_float()).sum();
     let avg = sum / args.len() as Float;
-
-    if avg.fract() == 0.0 {
-        return Result::Ok(Value::Int(avg as Integer));
-    }
-
-    Result::Ok(Value::Float(avg))
+    Result::Ok(Value::auto(avg))
 }
 
 pub fn ceil(args: &FuncArg) -> EvalResult {
@@ -117,14 +117,7 @@ pub fn ceil(args: &FuncArg) -> EvalResult {
         return Err(EvalErr::IncorrectArgumentCount(msg));
     }
 
-    let x = args[0].as_float();
-    let c = x.ceil();
-
-    if c.fract() == 0.0 {
-        return Ok(Value::Int(c as Integer));
-    }
-
-    Result::Ok(Value::Float(c))
+    Result::Ok(Value::auto(args[0].as_float().ceil()))
 }
 
 pub fn floor(args: &FuncArg) -> EvalResult {
@@ -133,14 +126,7 @@ pub fn floor(args: &FuncArg) -> EvalResult {
         return Err(EvalErr::IncorrectArgumentCount(msg));
     }
 
-    let x = args[0].as_float();
-    let f = x.floor();
-
-    if f.fract() == 0.0 {
-        return Result::Ok(Value::Int(f as Integer));
-    }
-
-    Result::Ok(Value::Float(f))
+    Result::Ok(Value::auto(args[0].as_float().floor()))
 }
 
 pub fn log(args: &FuncArg) -> EvalResult {
@@ -161,10 +147,88 @@ pub fn log(args: &FuncArg) -> EvalResult {
         return Err(EvalErr::InvalidArgument("log value must be > 0".into()));
     }
 
-    let result = value.log(base);
-    if result.fract() == 0.0 {
-        return Result::Ok(Value::Int(result as Integer));
+    Result::Ok(Value::auto(value.log(base)))
+}
+
+pub fn deg(args: &FuncArg) -> EvalResult {
+    if args.len() != 1 {
+        let msg = format!("expected 1 value, got {}", args.len());
+        return Err(EvalErr::IncorrectArgumentCount(msg));
     }
 
-    Result::Ok(Value::Float(result))
+    Result::Ok(Value::auto(args[0].as_float().to_degrees()))
+}
+
+pub fn rad(args: &FuncArg) -> EvalResult {
+    if args.len() != 1 {
+        let msg = format!("expected 1 value, got {}", args.len());
+        return Err(EvalErr::IncorrectArgumentCount(msg));
+    }
+
+    Result::Ok(Value::auto(args[0].as_float().to_radians()))
+}
+
+pub fn fact(args: &FuncArg) -> EvalResult {
+    if args.len() != 1 {
+        let msg = format!("expected 1 value, got {}", args.len());
+        return Err(EvalErr::IncorrectArgumentCount(msg));
+    }
+
+    match args[0] {
+        Value::Int(i) => {
+            if i < 0 {
+                let msg = format!("expected non-negative integer, got {}", i);
+                return Result::Err(EvalErr::InvalidArgument(msg));
+            } else if i == 0 {
+                return Result::Ok(Value::Int(1 as Integer));
+            }
+            return Result::Ok(Value::Int((0..i).product()));
+        },
+        Value::Float(f) => {
+            let msg = format!("expected non-negative integer, got {}", f);
+            return Result::Err(EvalErr::InvalidArgument(msg));
+        },
+    }
+}
+
+pub fn ncr(args: &FuncArg) -> EvalResult {
+    if args.len() != 2 {
+        let msg = format!("expected 2, got {}", args.len());
+        return Err(EvalErr::IncorrectArgumentCount(msg));
+    }
+
+    let n = args[0].as_int();
+    let r = args[1].as_int();
+    if n < r {
+        return Result::Ok(Value::zero());
+    }
+
+    let r = r.min(n-r);
+    let mut result = 1;
+
+    for i in 0..r {
+        result = result * (n-i) / (i+1);
+    }
+
+    Result::Ok(Value::Int(result as Integer))
+}
+
+pub fn npr(args: &FuncArg) -> EvalResult {
+    if args.len() != 2 {
+        let msg = format!("expected 2, got {}", args.len());
+        return Err(EvalErr::IncorrectArgumentCount(msg));
+    }
+
+    let n = args[0].as_int();
+    let r = args[1].as_int();
+    if n < r {
+        return Result::Ok(Value::zero());
+    }
+
+    let mut result = 1;
+    for i in 0..r {
+        result = n-i;
+    }
+
+    Result::Ok(Value::Int(result as Integer))
 }
