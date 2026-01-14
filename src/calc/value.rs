@@ -11,8 +11,15 @@ pub enum Value {
 
 impl Value {
     pub fn from_string(s: String) -> Option<Value> {
-        match s.parse::<Float>() {
-            Result::Ok(v) => Option::Some(Value::Float(v)),
+        if s.contains(".") {
+            return match s.parse::<Float>() {
+                Result::Ok(v) => Option::Some(Value::Float(v)),
+                Result::Err(_) => Option::None,
+            };
+        }
+
+        match s.parse::<Integer>() {
+            Result::Ok(v) => Option::Some(Value::Int(v)),
             Result::Err(_) => Option::None,
         }
     }
